@@ -1,0 +1,13 @@
+org.springframework.samples:spring-petclinic:jar:3.5.0-SNAPSHOT
++- org.springframework.boot:spring-boot-starter-actuator:jar:3.5.0:compile
+|  +- org.springframework.boot:spring-boot-starter:jar:3.5.0:compile
+|  |  +- org.springframework.boot:spring-boot:jar:3.5.0:compile
+|  |  \- org.yaml:snakeyaml:jar:2.4:compile
+|  \- io.micrometer:micrometer-observation:jar:1.15.0:compile
+|     \- io.micrometer:micrometer-commons:jar:1.15.0:compile
++- com.h2database:h2:jar:2.3.232:runtime
++- org.webjars.npm:bootstrap:jar:5.3.6:compile (optional)
++- io.netty:netty-transport-native-epoll:jar:linux-x86_64:4.1.121.Final:runtime
+\- org.springframework.boot:spring-boot-starter-test:jar:3.5.0:test
+   +- org.springframework.boot:spring-boot:jar:3.5.0:test
+   \- org.junit.jupiter:junit-jupiter:jar:5.12.2:test

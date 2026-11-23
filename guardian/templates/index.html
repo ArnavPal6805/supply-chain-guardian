@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Supply Chain Guardian</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="top"><div class="logo">Supply Chain <span>Guardian</span></div><div class="tag">Know what you build. Trust what you ship.</div></header>
+<main>
+  <div class="panel">
+    <h1>Discover a repository's software supply chain</h1>
+    <p class="sub">Paste a public GitHub repository. The Guardian clones it, finds every manifest, lockfile,
+      container image and CI/CD component, generates a CycloneDX SBOM and builds the dependency graph.
+      No package scripts are ever executed.</p>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form class="analyze" method="post" action="{{ url_for('start') }}">
+      <input type="text" name="url" placeholder="https://github.com/owner/repo" required autofocus>
+      <button type="submit">Analyze</button>
+      <div class="opts">
+        <label>SBOM engine
+          <select name="engine">
+            <option value="auto" selected>auto (cdxgen, fall back to built-in)</option>
+            <option value="cdxgen">cdxgen only</option>
+            <option value="builtin">built-in parsers only</option>
+          </select></label>
+        <label title="npm install --package-lock-only --ignore-scripts"><input type="checkbox" name="generate_lockfiles" checked> resolve missing npm lockfiles (scripts disabled)</label>
+        <label title="osv-scanner on the generated SBOM, then root-cause tracing through the graph"><input type="checkbox" name="scan_vulns" checked> scan for vulnerabilities (OSV)</label>
+        <label title="Report what changed since an earlier scan: new dependencies, version changes, tampered lockfile entries">compare with
+          <select name="baseline">
+            <option value="">no baseline</option>
+            {% for j in done %}<option value="{{ j.id }}">{{ j.repo }} · {{ j.id[:8] }} {{ j.id[9:11] }}:{{ j.id[11:13] }}</option>{% endfor %}
+          </select></label>
+        <label title="mvn dependency:tree and go mod graph (system tools only, never repo wrappers)"><input type="checkbox" name="run_build_tools" checked> use Maven / Go to resolve exact trees</label>
+      </div>
+    </form>
+    <div class="examples">Try:
+      <a href="#" onclick="fill('https://github.com/juice-shop/juice-shop')">juice-shop/juice-shop</a>
+      <a href="#" onclick="fill('https://github.com/spring-projects/spring-petclinic')">spring-projects/spring-petclinic</a>
+      <a href="#" onclick="fill('https://github.com/GoogleCloudPlatform/microservices-demo')">GoogleCloudPlatform/microservices-demo</a>
+    </div>
+  </div>
+
+  {% if jobs %}
+  <div class="panel">
+    <h2>Recent analyses</h2>
+    <table>
+      <tr><th>Repository</th><th>Status</th><th>Packages</th><th>Direct / transitive</th><th>Findings</th><th>Critical / high</th><th>Vulns / anomalies</th><th>Engine</th><th>Started</th></tr>
+      {% for j in jobs %}
+      <tr class="click" onclick="location.href='{{ url_for('job_page', job_id=j.id) }}'">
+        <td class="mono">{{ j.repo }}</td>
+        <td><span class="status {{ j.status }}">{{ j.status }}</span></td>
+        <td>{{ j.summary.packages if j.summary else '' }}</td>
+        <td>{% if j.summary %}{{ j.summary.direct }} / {{ j.summary.transitive }}{% endif %}</td>
+        <td>{{ j.summary.findings if j.summary and j.summary.findings is defined else '' }}</td>
+        <td>{% if j.summary and j.summary.critical is defined %}<span class="pill bad">{{ j.summary.critical }}</span> <span class="pill warn">{{ j.summary.high or 0 }}</span>{% endif %}</td>
+        <td>{% if j.summary and j.summary.findings is defined %}{{ j.summary.vulns or 0 }} / {{ j.summary.anomalies or 0 }}{% endif %}</td>
+        <td>{{ j.engine or '' }}</td>
+        <td class="muted">{{ j.id[:8] }} {{ j.id[9:11] }}:{{ j.id[11:13] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</main>
+<script>function fill(u){document.querySelector('input[name=url]').value=u;return false;}</script>
+</body>
+</html>

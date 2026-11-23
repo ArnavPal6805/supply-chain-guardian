@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ job.repo }} · Supply Chain Guardian</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="top"><div class="logo"><a href="{{ url_for('index') }}" style="color:inherit">Supply Chain <span>Guardian</span></a></div><div class="tag">Day 1 · Discover &amp; supply chain view</div></header>
+<main>
+  <div class="panel" id="head">
+    <h1 class="mono">{{ job.repo }}</h1>
+    <div class="sub" id="headsub"><span class="spinner"></span>Starting…</div>
+  </div>
+
+  <div id="progress" class="panel">
+    <h2 id="stage">Queued</h2>
+    <pre class="log" id="livelog"></pre>
+  </div>
+
+  <div id="results" style="display:none">
+    <div class="cards" id="cards"></div>
+    <div class="tabs" id="tabs">
+      <button data-t="overview" class="on">Overview</button>
+      <button data-t="findings">Findings</button>
+      <button data-t="components">Components</button>
+      <button data-t="graph">Dependency graph</button>
+      <button data-t="artifacts">Containers &amp; CI/CD</button>
+      <button data-t="projects">Projects &amp; detection</button>
+      <button data-t="files">SBOM &amp; log</button>
+    </div>
+
+    <section class="tab on" id="t-overview"></section>
+    <section class="tab" id="t-findings"></section>
+
+
+    <section class="tab" id="t-components">
+      <div class="panel">
+        <div class="toolbar">
+          <input id="q" placeholder="search name, purl, origin…">
+          <select id="f-eco"><option value="">all ecosystems</option></select>
+          <select id="f-kind"><option value="">direct + transitive</option><option value="direct">direct only</option><option value="trans">transitive only</option></select>
+          <select id="f-scope"><option value="">all scopes</option><option value="required">runtime (required)</option><option value="dev">dev / optional / test</option></select>
+          <select id="f-proj"><option value="">all projects</option></select>
+          <span class="muted" id="count"></span>
+        </div>
+        <div class="scroll"><table id="ctable"><thead><tr><th>Component</th><th>Version</th><th>Ecosystem</th><th>Relation</th><th>Depth</th><th>Scope</th><th>Origin</th><th>Introduced by</th><th>Vulns</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="tab" id="t-graph">
+      <div class="panel">
+        <div class="toolbar">
+          <input id="gq" placeholder="focus a component (type to search)…" list="gopts">
+          <datalist id="gopts"></datalist>
+          <button class="ghost" id="gfocus">Show path</button>
+          <button class="ghost" id="gexpand">Expand direct deps</button>
+          <button class="ghost" id="greset">Reset</button>
+          <button class="ghost" id="gfind" style="color:var(--bad);border-color:#f2b8bd">Only paths to critical &amp; high findings</button>
+          <span class="muted">Click a node to expand / collapse. Click a label to open its details.</span>
+        </div>
+        <div class="legend" id="glegend"></div>
+        <div class="graphbox" id="gbox"></div>
+      </div>
+    </section>
+
+    <section class="tab" id="t-artifacts"></section>
+    <section class="tab" id="t-projects"></section>
+    <section class="tab" id="t-files"></section>
+  </div>
+</main>
+
+<aside class="drawer" id="drawer"></aside>
+<script>window.JOB_ID = {{ job.id|tojson }};</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
